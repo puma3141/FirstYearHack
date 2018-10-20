@@ -41,18 +41,22 @@ function Earth(radius, texture) {
 
 Earth.prototype = Object.create(THREE.Object3D.prototype);
 
-Earth.prototype.createMarker = function(lat, lon) {
+Earth.prototype.createMarker = function(lat, lon, hashtag = '', url = '', city = '') {
     var marker = new Marker();
 
     var latRad = lat * (Math.PI / 180);
     var lonRad = -lon * (Math.PI / 180);
     var r = this.userData.radius;
 
+    marker.hashtag = hashtag;
+    marker.url = url
+    marker.city = city
+
     marker.position.set(Math.cos(latRad) * Math.cos(lonRad) * r, Math.sin(latRad) * r, Math.cos(latRad) * Math.sin(lonRad) * r);
     marker.rotation.set(0.0, -lonRad, latRad - Math.PI * 0.5);
 
     this.add(marker);
-    console.log(["Placed Marker:", lat, lon]);
+    // console.log(["Placed Marker:", lat, lon]);
 };
 
 // ------ Three.js code ------------------------------------------------
@@ -104,15 +108,24 @@ function init() {
 
     var texLoader = new THREE.TextureLoader(manager).setCrossOrigin(true);
 
-    var texture = texLoader.load('/images/earthmap1k2.jpg');
+    //var texture = texLoader.load('/images/earthmap1k2.jpg');
+    //var texture = texLoader.load('/images/earthlatlon.png');
+    var texture = texLoader.load('/images/ultrahigh.jpg');
+    //var texture = texLoader.load('/images/tron.png');
     //var texture = texLoader.load('/images/mars.png');
+
+
+
     texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
     //var earth = new Earth(1.0, texture);
     earth = new Earth(1.0, texture);
 
+    /*
     earth.createMarker(48.856700, 2.350800); // Paris
     earth.createMarker(51.507222, -0.1275); // London
+
+    /*
     earth.createMarker(34.050000, -118.250000); // LA
     earth.createMarker(41.836944, -87.684722); // Chicago
     earth.createMarker(35.683333, 139.683333); // Tokyo
@@ -127,7 +140,10 @@ function init() {
     earth.createMarker(42.358056, -71.063611); // Boston
     earth.createMarker(52.507222, 13.145833); // Berlin
 
+
     earth.createMarker(37.783333, -122.416667); // San Francisco
+    */
+
 
     scene.add(earth);
 
@@ -146,11 +162,11 @@ function init() {
 
     //renderer = new THREE.WebGLRenderer();    
 
-    console.log(earth)
+    //console.log(earth)
     pinList = earth.children;
-    pinList = pinList.slice(1,pinList.length) 
-    console.log(pinList)
-    currentPin = 1;
+    pinList = pinList.slice(1, pinList.length)
+    //console.log(pinList)
+    currentPin = 0;
 
 }
 
@@ -198,22 +214,44 @@ function onResize() {
     renderer.setSize(width, height);
 }
 
+var counter = 0
+var hashtagList = updateTweetsFromFile();
+
 function animate() {
+
+
+    pinList = earth.children.slice(1, pinList.length);
+
+
     requestAnimationFrame(animate);
 
     controls.update();
 
-    updateLabels();
-    
+    if (counter % 5 == 0) {
+        updateLabels();
+    }
+
     pinList.forEach(function(element) {
 
-      element.scale.set(2,2,2);
-    }); 
-    pinList[currentPin].scale.set(6, 6, 6);
-    
+        element.scale.set(1, 1, 1);
+    });
+    if(pinList[currentPin]){
+    pinList[currentPin].scale.set(5, 5, 5);
+    }
+
     update();
 
     renderer.render(scene, camera);
+
+    counter += 1
+    if (counter >= 6000) {
+        hashtagList = updateTweetsFromFile()
+        counter = 0;
+    }
+
+    if (!pinList[currentPin]){
+        currentPin = (Math.floor((Math.random() * 2 * pinList.length) + 1) + 1) % pinList.length;
+    }
 }
 
 function updateLabels() {
@@ -221,14 +259,42 @@ function updateLabels() {
     var text2 = document.createElement('div');
     text2.style.position = 'absolute';
     text2.setAttribute("id", "Div1");
-    //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+    text2.style.zIndex = 0; // if you still don't see the label, try uncommenting this
     text2.style.width = 100;
     text2.style.height = 100;
     text2.style.backgroundColor = "white";
-    text2.innerHTML = "#ISuckAtProgramming";
+    //text2.innerHTML = "#ISuckAtProgramming";
+    pin = pinList[currentPin]
+    if (pin) {
+        text2.innerHTML = '#' + pin.hashtag + "<br />" + pin.city;
+        var aTag = document.createElement('a');
+        aTag.setAttribute('href', pin.url);
+        aTag.setAttribute('target',  "_blank");
+        aTag.innerHTML = "<br />" + "Open in Twitter!";
+        text2.appendChild(aTag);
+    }
 
     earthPos = toScreenPosition(pinList[currentPin], camera)
     text2.style.top = earthPos['y'] + 'px';
     text2.style.left = earthPos['x'] + 'px';
     document.getElementById('divHolder').appendChild(text2);
+}
+
+
+function updateTweetsFromFile() {
+    hashtagListUpdate = []
+    $.getJSON("data/tweeter_data.json", function(data) {
+        $.each(data, function(index, value) {
+            hashtagList.push(value);
+            //console.log(value);
+            earth.createMarker(value['lat'], value['lon'], value['hashtag'], value['url'], value['name']);
+        });
+    });
+    //console.log(hashtagListUpdate);
+
+    //console.log(earth.children);
+    pinList = earth.children;
+
+    //console.log(pinList);
+    return hashtagListUpdate;
 }
