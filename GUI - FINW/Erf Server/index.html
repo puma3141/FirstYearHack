@@ -13,7 +13,11 @@
 <body>
     <!--<button onclick="earth.createMarker(Math.floor((Math.random() * 100) + 1), Math.floor((Math.random() * 100) + 1));">Click me</button>-->
     <button onclick="controls.autoRotateSpeed -= 2;">Clockwise, +speed</button>
+    <button onclick="controls.autoRotateSpeed = 0;">Pause</button>
     <button onclick="controls.autoRotateSpeed += 2;">Counterclockwise, -speed</button>
+
+    <button id='invisible'>          </button>
+
     <button onclick="currentPin = (currentPin + 1) % pinList.length; updateLabels();">Next pin</button>
 
     <button onclick="currentPin = (Math.floor((Math.random() * 2 * pinList.length) + 1) + 1) % pinList.length; updateLabels();">Random Pin</button>

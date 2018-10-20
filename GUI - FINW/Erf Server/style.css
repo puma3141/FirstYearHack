@@ -27,6 +27,13 @@ body {
     filter: alpha(opacity=85); /* For IE8 and earlier */
 }
 
+#invisible{
+    border: 0px;
+    color: '000000',
+    background-color: '000000',
+
+}
+
 button {
     color: #444444;
     background: #F3F3F3;

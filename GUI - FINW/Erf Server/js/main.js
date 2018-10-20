@@ -232,9 +232,11 @@ function animate() {
 
     controls.update();
 
-    if (counter % 5 == 0) {
+    if (counter % 1 == 0 && controls.autoRotateSpeed != 0) {
         updateLabels();
     }
+    pinList = earth.children;
+    pinList = pinList.slice(1, pinList.length);
 
     pinList.forEach(function(element) {
 
@@ -293,12 +295,14 @@ function updateTweetsFromFile() {
             hashtagList.push(value);
             //console.log(value);
             earth.createMarker(value['lat'], value['lon'], value['hashtag'], value['url'], value['name']);
+            pinList = earth.children;
+            update();
+            counter = 0;
         });
     });
     //console.log(hashtagListUpdate);
 
     //console.log(earth.children);
-    pinList = earth.children;
 
     //console.log(pinList);
     return hashtagListUpdate;
