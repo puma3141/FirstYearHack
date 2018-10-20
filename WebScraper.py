@@ -10,7 +10,7 @@ def updater():
 
         with open("twitter_credentials.json", "r") as file:
             creds = json.load(file)
-        with open("tweeter_data.json", mode="w") as data_file:
+        with open("D:\\coding\\GitHub\\FirstYearHack\\GUI - FINW\\tweeter_data.json", mode="w") as data_file:
             #authorazing
             twitter = Twython(creds['consumer_key1'], creds['consumer_secret1'])
             listOfHashtags = []
