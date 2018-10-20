@@ -83,8 +83,13 @@ function init() {
     document.body.appendChild(container);
 
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(800, 600);
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    value = 250;
+    renderer.setSize(4*value, 3*value);
+    //renderer.setSize(window.innerWidth, window.innerHeight);
+    //var canvas = document.getElementById('canvas');
+
+    //renderer.setSize(canvas.width, canvas.height);
+
     container.appendChild(renderer.domElement);
 
     //scene.background = new THREE.Color( 0x000000 );
@@ -235,8 +240,8 @@ function animate() {
 
         element.scale.set(1, 1, 1);
     });
-    if(pinList[currentPin]){
-    pinList[currentPin].scale.set(5, 5, 5);
+    if (pinList[currentPin]) {
+        pinList[currentPin].scale.set(5, 5, 5);
     }
 
     update();
@@ -249,7 +254,7 @@ function animate() {
         counter = 0;
     }
 
-    if (!pinList[currentPin]){
+    if (!pinList[currentPin]) {
         currentPin = (Math.floor((Math.random() * 2 * pinList.length) + 1) + 1) % pinList.length;
     }
 }
@@ -269,7 +274,7 @@ function updateLabels() {
         text2.innerHTML = '#' + pin.hashtag + "<br />" + pin.city;
         var aTag = document.createElement('a');
         aTag.setAttribute('href', pin.url);
-        aTag.setAttribute('target',  "_blank");
+        aTag.setAttribute('target', "_blank");
         aTag.innerHTML = "<br />" + "Open in Twitter!";
         text2.appendChild(aTag);
     }
