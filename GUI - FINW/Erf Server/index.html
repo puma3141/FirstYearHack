@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <script src='js/three.js'></script>
-<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
-<script src="https://s3-eu-west-2.amazonaws.com/bckld/lab/loading.js"></script>
+<script src="js/OrbitControls.js"></script>
+<script src="js/loading.js"></script>
 <script src="js/main.js" defer></script>
 <script src='js/updates.js'></script>
 
-
-
 <head>
-	<link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 
-<body style='margin: 0px; background-color: #FFFFFF; overflow: hidden;'>
+<body>
+    <button onclick="earth.createMarker(Math.floor((Math.random() * 100) + 1), Math.floor((Math.random() * 100) + 1));">Click me</button>
+    <button onclick="controls.autoRotateSpeed += 2;">Increase speed</button>
+    <button onclick="controls.autoRotateSpeed -= 2;">Decrease speed</button>
+    <button onclick="currentPin = (currentPin + 1) % pinList.length;">Next pin</button>
 
-<canvas id='canvas'></canvas>
-<button onclick="earth.createMarker(Math.floor((Math.random() * 100) + 1), Math.floor((Math.random() * 100) + 1));">Click me</button>
 
+    <div id="canvas">
+    <div id="divHolder">
 
 </body>

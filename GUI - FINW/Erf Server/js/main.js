@@ -8,7 +8,7 @@ function Marker() {
     var height = 0.05;
 
     //var material = new THREE.MeshPhongMaterial({ color: 0xe00f0f });
-    var material = new THREE.MeshToonMaterial({color: 0xeef0f});
+    var material = new THREE.MeshToonMaterial({ color: 0xeef0f });
 
     var cone = new THREE.Mesh(new THREE.ConeBufferGeometry(radius, height, 8, 1, true), material);
     cone.position.y = height * 0.5;
@@ -41,7 +41,7 @@ function Earth(radius, texture) {
 
 Earth.prototype = Object.create(THREE.Object3D.prototype);
 
-Earth.prototype.createMarker = function (lat, lon) {
+Earth.prototype.createMarker = function(lat, lon) {
     var marker = new Marker();
 
     var latRad = lat * (Math.PI / 180);
@@ -52,7 +52,7 @@ Earth.prototype.createMarker = function (lat, lon) {
     marker.rotation.set(0.0, -lonRad, latRad - Math.PI * 0.5);
 
     this.add(marker);
-    console.log(["Placed Marker:",lat,lon]);
+    console.log(["Placed Marker:", lat, lon]);
 };
 
 // ------ Three.js code ------------------------------------------------
@@ -61,23 +61,35 @@ var scene, camera, renderer;
 var controls;
 
 var earth;
+var projector;
+
+var currentPin, pinList;
 
 init();
 
 function init() {
+
+
     scene = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera(45, 4 / 3, 0.1, 100);
     camera.position.set(0.0, 1.5, 3.0);
 
-    //renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });    
-    renderer.setSize(600, 600);
-    //renderer.setSize(width, height);
+    container = document.getElementById('canvas');
+    document.body.appendChild(container);
+
+    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(800, 600);
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    container.appendChild(renderer.domElement);
+
+    //scene.background = new THREE.Color( 0x000000 );
+    renderer.setClearColor(0x000000, 0);
 
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.autoRotate = true;
-    controls.autoRotateSpeed = -1.0;
+    //controls.autoRotateSpeed = 999.0;
+    controls.autoRotateSpeed = -2;
     controls.enablePan = false;
 
     var ambient = new THREE.AmbientLight(0xffffff, 0.5);
@@ -92,7 +104,8 @@ function init() {
 
     var texLoader = new THREE.TextureLoader(manager).setCrossOrigin(true);
 
-    var texture = texLoader.load('https://s3-eu-west-2.amazonaws.com/bckld/lab/textures/earth_latlon.jpg');
+    var texture = texLoader.load('/images/earthmap1k2.jpg');
+    //var texture = texLoader.load('/images/mars.png');
     texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
 
     //var earth = new Earth(1.0, texture);
@@ -131,11 +144,48 @@ function init() {
     //**/
 
 
-    //renderer = new THREE.WebGLRenderer();
-    
+    //renderer = new THREE.WebGLRenderer();    
 
-    
+    console.log(earth)
+    pinList = earth.children;
+    pinList = pinList.slice(1,pinList.length) 
+    console.log(pinList)
+    currentPin = 1;
+
 }
+
+
+/*
+function toScreenXY( position, camera, jqdiv ) {
+
+    var pos = position.clone();
+    projScreenMat = new THREE.Matrix4();
+    projScreenMat.multiply( camera.projectionMatrix, camera.matrixWorldInverse );
+    projScreenMat.multiplyVector3( pos );
+
+    return { x: ( pos.x + 1 ) * jqdiv.width() / 2 + jqdiv.offset().left,
+         y: ( - pos.y + 1) * jqdiv.height() / 2 + jqdiv.offset().top };
+
+}*/
+function toScreenPosition(obj, camera) {
+    var vector = new THREE.Vector3();
+
+    var widthHalf = 0.5 * renderer.context.canvas.width;
+    var heightHalf = 0.5 * renderer.context.canvas.height;
+
+    obj.updateMatrixWorld();
+    vector.setFromMatrixPosition(obj.matrixWorld);
+    vector.project(camera);
+
+    vector.x = (vector.x * widthHalf) + widthHalf;
+    vector.y = -(vector.y * heightHalf) + heightHalf;
+    return {
+        x: vector.x,
+        y: vector.y
+    };
+
+};
+
 
 function onResize() {
     var canvas = document.getElementById('canvas');
@@ -153,7 +203,32 @@ function animate() {
 
     controls.update();
 
+    updateLabels();
+    
+    pinList.forEach(function(element) {
+
+      element.scale.set(2,2,2);
+    }); 
+    pinList[currentPin].scale.set(6, 6, 6);
+    
     update();
 
     renderer.render(scene, camera);
+}
+
+function updateLabels() {
+    document.getElementById('divHolder').textContent = '';
+    var text2 = document.createElement('div');
+    text2.style.position = 'absolute';
+    text2.setAttribute("id", "Div1");
+    //text2.style.zIndex = 1;    // if you still don't see the label, try uncommenting this
+    text2.style.width = 100;
+    text2.style.height = 100;
+    text2.style.backgroundColor = "white";
+    text2.innerHTML = "#ISuckAtProgramming";
+
+    earthPos = toScreenPosition(pinList[currentPin], camera)
+    text2.style.top = earthPos['y'] + 'px';
+    text2.style.left = earthPos['x'] + 'px';
+    document.getElementById('divHolder').appendChild(text2);
 }
