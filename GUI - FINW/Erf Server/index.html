@@ -16,13 +16,14 @@
     <button id='playpause'>Pause/Play</button>
     <button onclick="controls.autoRotateSpeed += 2;">Counterclockwise, -speed</button>
     <button id='invisible'> </button>
-    <button onclick="currentPin = (currentPin + 1) % pinList.length; updateLabels();">Next pin</button>
-    <button onclick="currentPin = (Math.floor((Math.random() * 2 * pinList.length) + 1) + 1) % pinList.length; updateLabels();">Random Pin</button>
-    &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp &nbsp Erf
+    <button id='prevpin'>Previous pin</button>
+    <button id='nextpin'>Next pin</button>
+    <button id='randpin'>Random Pin</button>
+    <div style="display: inline-block;" id='pincounter'></div>
+    Erf
     <div id="canvas">
         <div id="divHolder"></div>
     </div>
-
     <script>
     document.getElementById('playpause').onclick = function() {
         if (controls.autoRotateSpeed != 0) {
@@ -31,6 +32,27 @@
         } else {
             controls.autoRotateSpeed = pauseSpeed;
         }
+    }
+
+    document.getElementById('nextpin').onclick = function() {
+        currentPin = (currentPin + 1) % pinList.length;
+        updateLabels();
+        document.getElementById('pincounter').innerHTML = currentPin
+    }
+
+    document.getElementById('prevpin').onclick = function() {
+        currentPin = (currentPin - 1);
+        if (currentPin < 0){
+            currentPin = pinList.length - 1
+        }
+        updateLabels();
+        document.getElementById('pincounter').innerHTML = currentPin
+    }
+
+    document.getElementById('randpin').onclick = function() {
+        currentPin = (Math.floor((Math.random() * 2 * pinList.length) + 1) + 1) % pinList.length;
+        updateLabels();
+        document.getElementById('pincounter').innerHTML = currentPin
     }
     </script>
 </body>
