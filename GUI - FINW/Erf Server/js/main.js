@@ -69,6 +69,8 @@ var projector;
 
 var currentPin, pinList;
 
+var pauseSpeed;
+
 init();
 
 function init() {
@@ -84,7 +86,7 @@ function init() {
 
     renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
     value = 250;
-    renderer.setSize(4*value, 3*value);
+    renderer.setSize(4 * value, 3 * value);
     //renderer.setSize(window.innerWidth, window.innerHeight);
     //var canvas = document.getElementById('canvas');
 
@@ -222,6 +224,14 @@ function onResize() {
 var counter = 0
 var hashtagList = updateTweetsFromFile();
 
+var mouseDown = 0;
+document.body.onmousedown = function() {
+    ++mouseDown;
+}
+document.body.onmouseup = function() {
+    --mouseDown;
+}
+
 function animate() {
 
 
@@ -232,9 +242,16 @@ function animate() {
 
     controls.update();
 
-    if (counter % 1 == 0 && controls.autoRotateSpeed != 0) {
-        updateLabels();
+    if (counter % 1 == 0) {
+        if (controls.autoRotateSpeed == 0) {
+            if (!mouseDown) {
+                updateLabels();
+            }
+        } else {
+            updateLabels();
+        }
     }
+
     pinList = earth.children;
     pinList = pinList.slice(1, pinList.length);
 
@@ -262,6 +279,7 @@ function animate() {
 }
 
 function updateLabels() {
+    //return;
     document.getElementById('divHolder').textContent = '';
     var text2 = document.createElement('div');
     text2.style.position = 'absolute';
@@ -287,23 +305,42 @@ function updateLabels() {
     document.getElementById('divHolder').appendChild(text2);
 }
 
+var hashtagsByCityGlob;
+
 
 function updateTweetsFromFile() {
     hashtagListUpdate = []
+    hashtagsByCity = {}
     $.getJSON("data/tweeter_data.json", function(data) {
         $.each(data, function(index, value) {
-            hashtagList.push(value);
+            hashtagListUpdate.push(value);
             //console.log(value);
-            earth.createMarker(value['lat'], value['lon'], value['hashtag'], value['url'], value['name']);
+            if (!hashtagsByCity[value['name']]) {
+                hashtagsByCity[value['name']] = []
+
+                earth.createMarker(value['lat'], value['lon'], value['hashtag'], value['url'], value['name']);
+
+            }
+            hashtagsByCity[value['name']].push([value['lat'], value['lon'], value['hashtag'], value['url']]);
+            //console.log(hashtagsByCity);
+
+
             pinList = earth.children;
             update();
             counter = 0;
         });
+        hashtagsByCityGlob = hashtagsByCity;
+
     });
-    //console.log(hashtagListUpdate);
 
     //console.log(earth.children);
 
     //console.log(pinList);
+    //hashtagList = hashtagListUpdate
     return hashtagListUpdate;
+}
+
+
+function updatePinsFromHashtags() {
+
 }
